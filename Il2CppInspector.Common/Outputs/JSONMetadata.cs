@@ -109,7 +109,11 @@ namespace Il2CppInspector.Outputs
 
                         if (type.TypeClassAddress != 0xffffffff_ffffffff) {
                             writeObject(() => {
-                                writeTypedName(type.TypeClassAddress, $"struct {type.Name}__Class *", type.ToMangledTypeInfoString());
+                                var classTypeName = $"{type.Name}__Class";
+                                var typeName = model.CppTypeCollection.Types.ContainsKey(classTypeName)
+                                    ? $"struct {classTypeName} *"
+                                    : "struct Il2CppClass *";
+                                writeTypedName(type.TypeClassAddress, typeName, type.ToMangledTypeInfoString());
                                 writeDotNetTypeName(type.Type);
                             });
                         }

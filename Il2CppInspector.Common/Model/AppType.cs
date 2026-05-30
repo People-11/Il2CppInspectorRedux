@@ -33,19 +33,21 @@ namespace Il2CppInspector.Model
         // The VA of the Il2CppType* (VA of the pointer to the Il2CppType) object which references this type (ClassName__TypeRef)
         public ulong TypeRefPtrAddress { get; internal set; }
 
+        // The C++ base name assigned by CppDeclarationGenerator.TypeNamer.
+        public string CppName { get; internal set; }
+
         public AppType(TypeInfo ilType, CppComplexType cppType, CppComplexType valueType = null,
             ulong cppClassPtr = 0xffffffff_ffffffff, ulong cppTypeRefPtr = 0xffffffff_ffffffff) {
             CppType = cppType;
             Type = ilType;
             CppValueType = valueType;
+            CppName = valueType?.Name ?? cppType?.Name;
             TypeClassAddress = cppClassPtr;
             TypeRefPtrAddress = cppTypeRefPtr;
         }
 
         // The C++ name of the type
-        // TODO: Known issue here where we should be using CppDeclarationGenerator.TypeNamer to ensure uniqueness
-        // Prefer Foo over Foo__Boxed; if there is no C++ type defined, just convert the IL type to a C identifier
-        public string Name => CppValueType?.Name ?? CppType?.Name ?? Type.Name.ToCIdentifier();
+        public string Name => CppName ?? CppValueType?.Name ?? CppType?.Name ?? Type.Name.ToCIdentifier();
 
         public override string ToString() => Type.FullName + " -> " + CppType.Name;
 

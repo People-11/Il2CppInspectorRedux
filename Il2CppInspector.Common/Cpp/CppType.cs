@@ -204,8 +204,8 @@ namespace Il2CppInspector.Cpp
         public override string ToString(string format = "") => "typedef " + ToFieldString(Name) + ";\n";
 
         // Output as a function signature
-        public string ToSignatureString() => $"{ReturnType.Name} {Name}("
-            + string.Join(", ", Arguments.Select(a => a.Type is CppFnPtrType fn? fn.ToFieldString(a.Name) : a.Type.Name + (a.Name.Length > 0? " " + a.Name : "")))
+        public string ToSignatureString() => ReturnType.ToFieldString(Name) + "("
+            + string.Join(", ", Arguments.Select(a => a.Type.ToFieldString(a.Name)))
             + ")";
     }
 

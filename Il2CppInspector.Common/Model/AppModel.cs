@@ -58,7 +58,7 @@ namespace Il2CppInspector.Model
         public Dictionary<ulong, string> Strings { get; } = [];
 
         public Dictionary<ulong, (FieldInfo Field, string Value)> Fields { get; } = [];
-        public Dictionary<ulong, (FieldInfo Field, string Value)> FieldRvas { get; } = []; 
+        public Dictionary<ulong, (FieldInfo Field, string Value)> FieldRvas { get; } = [];
 
         public bool StringIndexesAreOrdinals => Package.Version < MetadataVersions.V190;
 
@@ -322,7 +322,7 @@ namespace Il2CppInspector.Model
             return this;
         }
 
-        private void AddTypes(List<(TypeInfo ilType, CppComplexType valueType, CppComplexType referenceType, 
+        private void AddTypes(List<(TypeInfo ilType, CppComplexType valueType, CppComplexType referenceType,
             CppComplexType fieldsType, CppComplexType vtableType, CppComplexType staticsType)> types) {
 
             // Add types to dependency-ordered list
@@ -342,8 +342,17 @@ namespace Il2CppInspector.Model
 
             // Create composite types
             foreach (var type in types)
+            {
                 if (!Types.ContainsKey(type.ilType))
                     Types.Add(type.ilType, type.referenceType, new AppType(type.ilType, type.referenceType, type.valueType) {Group = Group});
+                else
+                {
+                    var appType = Types[type.ilType];
+                    appType.CppType ??= type.referenceType;
+                    appType.CppValueType ??= type.valueType;
+                    appType.CppName ??= type.valueType?.Name ?? type.referenceType?.Name;
+                }
+            }
         }
 
         // Get all the C++ types for a group

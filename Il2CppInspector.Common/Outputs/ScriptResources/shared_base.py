@@ -43,6 +43,9 @@ class BaseDisassemblerInterface(abc.ABC):
     def on_finish(self):
         pass
 
+    def configure_address_mapping(self, metadata: dict):
+        pass
+
     @abc.abstractmethod
     def define_function(self, address: int, end: Union[int, None] = None):
         pass
@@ -341,6 +344,7 @@ class ScriptContext:
         self._status.update_step(
             "Processing IL2CPP function metadata", len(metadata["functionMetadata"])
         )
+        self._backend.cache_function_types([x["signature"] for x in metadata["functionMetadata"]])
         for d in metadata["functionMetadata"]:
             self.define_cpp_function(d)
 
@@ -374,6 +378,7 @@ class ScriptContext:
             with open(metadata_path, "r") as f:
                 self._status.update_step("Loading JSON metadata")
                 metadata = json.load(f)["addressMap"]
+                self._backend.configure_address_mapping(metadata)
                 self.process_metadata(metadata)
 
             self._status.update_step("Running script epilogue")

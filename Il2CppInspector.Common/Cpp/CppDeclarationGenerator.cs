@@ -35,7 +35,7 @@ public class CppDeclarationGenerator
 
     public CppDeclarationGenerator(AppModel appModel) {
         this.appModel = appModel;
-            
+
         InitializeNaming();
         InitializeConcreteImplementations();
 
@@ -326,7 +326,7 @@ public class CppDeclarationGenerator
         }
 
         var depth = startingDepth;
-        
+
         var args = type.GenericTypeArguments;
         for (int i = 0; i < args.Length; i++)
         {
@@ -343,10 +343,14 @@ public class CppDeclarationGenerator
     /// <param name="ti"></param>
     public void IncludeType(TypeInfo ti)
     {
-        if (_visitedTypes.Contains(ti))
+        if (ti.ContainsGenericParameters)
             return;
 
-        if (ti.ContainsGenericParameters)
+        var name = TypeNamer.GetName(ti);
+        if (appModel.Types.ContainsKey(ti))
+            appModel.Types[ti].CppName ??= name;
+
+        if (_visitedTypes.Contains(ti))
             return;
 
         _visitedTypes.Add(ti);
@@ -371,11 +375,11 @@ public class CppDeclarationGenerator
             return;
         }
 
-        if (ti.IsArray || ti.HasElementType) 
+        if (ti.IsArray || ti.HasElementType)
         {
             IncludeType(ti.ElementType);
-        } 
-        else if (ti.IsEnum) 
+        }
+        else if (ti.IsEnum)
         {
             IncludeType(ti.GetEnumUnderlyingType());
         }
@@ -386,8 +390,6 @@ public class CppDeclarationGenerator
 
         if (ti.BaseType != null)
             IncludeType(ti.BaseType);
-
-        TypeNamer.GetName(ti);
 
         foreach (var fi in ti.DeclaredFields)
             IncludeType(fi.FieldType);
@@ -497,7 +499,7 @@ public class CppDeclarationGenerator
             var (cls, statics, vtable) = GenerateTypeStruct(ti);
             decl.Add((ti, null, cls, null, vtable, statics));
         }
-        
+
         foreach (var ti in _todoTypesExceedingNestingLimit)
         {
             var dummyType = GenerateNestingLimitExceededStruct(ti);
@@ -618,7 +620,7 @@ public class CppDeclarationGenerator
         "_Alignas", "_Alignof", "_Atomic", "_Bool",
         "_Complex", "_Generic",
         "_Imaginary", "_Noreturn", "_Static_assert", "_Thread_local",
-        "alignas", "alignof", "and", "and_eq", 
+        "alignas", "alignof", "and", "and_eq",
         "asm", "auto", "bitand", "bitor",
         "bool", "break", "case", "catch",
         "char", "char16_t", "char32_t", "char8_t",
